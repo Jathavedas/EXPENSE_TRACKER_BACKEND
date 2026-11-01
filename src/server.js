@@ -27,7 +27,14 @@ connectDB();
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -88,6 +95,6 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Expense Tracker Backend Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Expense Tracker Backend Server running on port ${PORT} on 0.0.0.0 in ${process.env.NODE_ENV || 'development'} mode`);
 });
