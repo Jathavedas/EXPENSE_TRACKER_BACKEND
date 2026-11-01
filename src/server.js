@@ -38,6 +38,17 @@ if (process.env.NODE_ENV !== 'production') {
 // Static folder for file uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Root endpoint (Health & API Info)
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: '🚀 Jathu Expense Tracker API is running smoothly',
+    version: '1.0.0',
+    status: 'online',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
