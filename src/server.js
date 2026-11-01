@@ -58,6 +58,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Ping routes (Uptime monitoring & Keep-alive)
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'pong',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
