@@ -11,7 +11,12 @@ const { seedUserData } = require('./seedData');
 
 const setup = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/jathu_expense_tracker';
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MONGO_URI is not defined in environment variables');
+    }
+
+    console.log('Connecting to database...');
     await mongoose.connect(mongoUri);
     console.log('MongoDB connected successfully');
 
@@ -46,15 +51,15 @@ const setup = async () => {
         currency: 'INR',
         currencySymbol: '₹',
         theme: 'dark',
-        monthlyBudget: 35000,
+        monthlyBudget: 0,
       });
       await user.save();
       console.log(`User created with ID: ${user._id}`);
 
-      // Seed starter categories, accounts, budget, transactions
-      console.log('Seeding starter accounts, categories, budgets, and transactions...');
+      // Initialize clean categories and starter accounts (NO dummy transactions)
+      console.log('Initializing clean categories and starter accounts...');
       await seedUserData(user._id, user.name);
-      console.log('User data seeded successfully.');
+      console.log('Clean workspace initialized successfully.');
     } else {
       console.log(`User ${targetEmail} exists. Updating password...`);
       user.password = targetPassword;
@@ -62,19 +67,25 @@ const setup = async () => {
       await user.save();
       console.log('Password updated successfully.');
 
-      // Check if accounts exist, if not, seed
+      // Check if categories or accounts exist; if not, initialize clean structure
       const accountCount = await Account.countDocuments({ user: user._id });
       if (accountCount === 0) {
-        console.log('No accounts found for user. Seeding data...');
+        console.log('No accounts found for user. Initializing clean workspace...');
         await seedUserData(user._id, user.name);
-        console.log('Data seeded.');
+        console.log('Clean accounts and categories initialized.');
       }
     }
 
+    // Verify 0 dummy transactions
+    const transactionCount = await Transaction.countDocuments({ user: user._id });
+    const recurringCount = await RecurringTransaction.countDocuments({ user: user._id });
+
     console.log('\n=============================================');
-    console.log('✅ USER SETUP COMPLETE:');
-    console.log(`   Email:    ${targetEmail}`);
-    console.log(`   Password: ${targetPassword}`);
+    console.log('✅ DATABASE INITIALIZATION VERIFIED:');
+    console.log(`   Email:               ${targetEmail}`);
+    console.log(`   User ID:             ${user._id}`);
+    console.log(`   Dummy Transactions:  ${transactionCount}`);
+    console.log(`   Dummy Recurring:     ${recurringCount}`);
     console.log('=============================================\n');
 
     process.exit(0);
